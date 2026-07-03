@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jbrt"
+version = "0.1.0"
+description = "JBRT共通ユーティリティ（データパス設定など）"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "s_mori", email = "s.mori.5986@gmail.com" }]
+keywords = ["jbrt", "snp", "bioinformatics"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+# jbrt.snp が pandas / scipy に依存する。
+# (config.py 単体は標準ライブラリのみで動く)
+dependencies = [
+    "pandas",
+    "scipy",
+]
+
+[project.urls]
+Homepage = "https://github.com/smori5986/jbrt"
+Repository = "https://github.com/smori5986/jbrt"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jbrt"]
