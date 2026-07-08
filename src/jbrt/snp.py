@@ -25,6 +25,7 @@ GENOTYPE_TO_CODE = {"AA": 0, "AB": 1, "BB": 2}
 __all__ = [
     "VALID_GENOTYPES",
     "GENOTYPE_TO_CODE",
+    "find_genotyping_txt",
     "load_genotyping_txt",
     "concat_common_snps",
     "filter_missing",
@@ -35,6 +36,28 @@ __all__ = [
     "load_metadata",
     "reorder_by_metadata",
 ]
+
+
+def find_genotyping_txt(
+    input_dir, pattern: str = "Genotyping_AX*.txt", select=None
+) -> list:
+    """input_dir 配下から pattern に合う TXT を再帰的に集めて返す.
+
+    - ``select`` を渡すと、ファイル名にそのキー(AX番号など)を含むものだけに絞る。
+    - ``select=None`` なら該当ファイルを全て返す。
+    - 該当0件なら FileNotFoundError を送出する(打ち間違い検知)。
+    """
+    input_dir = Path(input_dir)
+    paths = sorted(input_dir.rglob(pattern))
+    if not paths:
+        raise FileNotFoundError(f"TXTが見つかりません: {input_dir} (pattern={pattern})")
+
+    if select is not None:
+        paths = [p for p in paths if any(key in p.name for key in select)]
+        if not paths:
+            raise FileNotFoundError(f"select に合うTXTがありません: select={select}")
+
+    return paths
 
 
 def load_genotyping_txt(path) -> pd.DataFrame:
@@ -64,7 +87,7 @@ def load_genotyping_txt(path) -> pd.DataFrame:
 
     # 転置: SNP×サンプル → サンプル×SNP
     df = df.set_index("probeset_id").T
-    df.index.name = "sample_id"
+    df.index.name = "snp_id"
     return df
 
 
