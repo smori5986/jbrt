@@ -10,3 +10,6 @@ venv/
 
 # OS
 .DS_Store
+
+# 作業用スクラッチ
+scratch/
