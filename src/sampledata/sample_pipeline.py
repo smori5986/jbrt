@@ -862,12 +862,16 @@ def resolve_p1_cat_id(combined) -> pd.DataFrame:
                   .drop_duplicates("breed_id").set_index("breed_id")["cat_id"])
     combined["p1_cat_id"] = combined["p1_breed_id"].map(_breed2cat)              # ① breed_id法
     _n_bid = int(combined["p1_cat_id"].notna().sum())
-    _name2cat = (combined.dropna(subset=["name", "cat_id"]).drop_duplicates("name", keep=False)
-                 .set_index("name")["cat_id"])                                   # 一意な名号のみ
+    # 同一個体が複数行に出るだけのケースを先に畳む。行単位で keep=False すると
+    # 血液+骨格筋で2回測った種雄牛などが「同名複数」と誤判定されて捨てられる。
+    _uniq = combined.dropna(subset=["name", "cat_id"]).drop_duplicates(["name", "cat_id"])
+    _name2cat = _uniq.drop_duplicates("name", keep=False).set_index("name")["cat_id"]  # 真に一意な名号のみ
+    _n_amb = int(_uniq["name"].nunique() - len(_name2cat))       # 同名で複数cat_id → 曖昧として除外
     combined["p1_cat_id"] = combined["p1_cat_id"].fillna(combined["p1_name"].map(_name2cat))  # ② name法
     _head("p1_cat_id解決")
     _sub(f"解決 {_n(combined['p1_cat_id'].notna().sum())}件"
          f"（breed_id法 {_n(_n_bid)} + name法 {_n(int(combined['p1_cat_id'].notna().sum()) - _n_bid)}）")
+    _sub(f"曖昧(同名で複数cat_id)により name法から除外した名号: {_n(_n_amb)}件")
     return combined
 
 
