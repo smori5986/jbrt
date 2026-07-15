@@ -27,6 +27,7 @@ sys.path.insert(0, "/home/s_mori/JBRT/JBRT_share/src")          # jbrt.config
 
 from jbrt import config                                          # noqa: E402
 import table_report                                              # noqa: E402
+import xlsx_report                                               # noqa: E402
 from nlbc_scraper import search_pedigree                         # noqa: E402
 
 # openpyxl の無害な警告を抑制（Excel独自プロパティ / データ検証拡張は読み込みに影響なし）
@@ -1172,7 +1173,7 @@ def save_outputs(combined, version: str = "20260708") -> pd.DataFrame:
     out.mkdir(parents=True, exist_ok=True)
 
     combined.to_parquet(out / "sample_table.parquet", index=False)
-    combined.to_excel(out / "sample_table.xlsx", index=False)                # openpyxl
+    xlsx_report.build_xlsx(combined, out / "sample_table.xlsx")              # 整形 + カラム説明シート
     table_report.build_html_report(combined, out / "sample_table.html")
 
     # group は複数メンバーシップ(";"区切り) → グループごとの帰属個体数で集計
